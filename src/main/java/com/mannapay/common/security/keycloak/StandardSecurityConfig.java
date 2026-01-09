@@ -2,6 +2,7 @@ package com.mannapay.common.security.keycloak;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -24,13 +25,14 @@ import java.util.List;
  * Standard security configuration for all MannaPay microservices.
  * Uses Keycloak as the OAuth2/OIDC identity provider.
  *
- * Services can import this configuration and customize it as needed.
+ * Services can override by defining their own SecurityFilterChain beans.
  * Based on salon-project implementation pattern.
  */
-@Configuration
+@Configuration("standardSecurityConfig")
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
+@ConditionalOnMissingBean(SecurityFilterChain.class)
 public class StandardSecurityConfig {
 
     private final JwtAuthConverter jwtAuthConverter;
@@ -45,8 +47,9 @@ public class StandardSecurityConfig {
      * Public endpoints security filter chain.
      * Matches health checks, actuator, swagger, and other public endpoints.
      */
-    @Bean
+    @Bean("commonPublicEndpointsFilterChain")
     @Order(1)
+    @ConditionalOnMissingBean(name = "publicEndpointsFilterChain")
     public SecurityFilterChain publicEndpointsFilterChain(HttpSecurity http) throws Exception {
         http
             .securityMatcher(
@@ -76,8 +79,9 @@ public class StandardSecurityConfig {
      * Main security filter chain for protected endpoints.
      * Validates JWT tokens from Keycloak.
      */
-    @Bean
+    @Bean("commonSecurityFilterChain")
     @Order(2)
+    @ConditionalOnMissingBean(name = "securityFilterChain")
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
@@ -106,7 +110,8 @@ public class StandardSecurityConfig {
     /**
      * JWT decoder bean that validates tokens using Keycloak's JWK Set URI.
      */
-    @Bean
+    @Bean("commonJwtDecoder")
+    @ConditionalOnMissingBean(JwtDecoder.class)
     public JwtDecoder jwtDecoder() {
         return NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
     }
@@ -114,7 +119,8 @@ public class StandardSecurityConfig {
     /**
      * CORS configuration source.
      */
-    @Bean
+    @Bean("commonStandardCorsConfigurationSource")
+    @ConditionalOnMissingBean(CorsConfigurationSource.class)
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
