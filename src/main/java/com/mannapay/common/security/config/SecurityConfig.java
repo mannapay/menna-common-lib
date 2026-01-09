@@ -2,6 +2,7 @@ package com.mannapay.common.security.config;
 
 import com.mannapay.common.security.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,11 +26,13 @@ import java.util.List;
 /**
  * Base security configuration for MannaPay services.
  * Provides JWT-based authentication and authorization.
+ * Services can override this by defining their own SecurityFilterChain bean.
  */
-@Configuration
+@Configuration("commonSecurityConfig")
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @RequiredArgsConstructor
+@ConditionalOnMissingBean(name = "securityFilterChain")
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -37,7 +40,8 @@ public class SecurityConfig {
     /**
      * Configure security filter chain
      */
-    @Bean
+    @Bean("commonSecurityFilterChain")
+    @ConditionalOnMissingBean(SecurityFilterChain.class)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -67,7 +71,8 @@ public class SecurityConfig {
     /**
      * Password encoder bean
      */
-    @Bean
+    @Bean("commonPasswordEncoder")
+    @ConditionalOnMissingBean(PasswordEncoder.class)
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12);
     }
@@ -75,7 +80,8 @@ public class SecurityConfig {
     /**
      * Authentication manager bean
      */
-    @Bean
+    @Bean("commonAuthenticationManager")
+    @ConditionalOnMissingBean(AuthenticationManager.class)
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
@@ -83,7 +89,8 @@ public class SecurityConfig {
     /**
      * CORS configuration
      */
-    @Bean
+    @Bean("commonCorsConfigurationSource")
+    @ConditionalOnMissingBean(CorsConfigurationSource.class)
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(List.of("*"));
