@@ -2,6 +2,7 @@ package com.mannapay.common.security.config;
 
 import com.mannapay.common.security.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,14 +25,15 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Base security configuration for MannaPay services.
- * Provides JWT-based authentication and authorization.
- * Services can override this by defining their own SecurityFilterChain bean.
+ * Base security configuration for MannaPay services using JWT-based auth.
+ * Only activated when JwtAuthenticationFilter is present (jwt.secret is set).
+ * Services using Keycloak should use StandardSecurityConfig instead.
  */
 @Configuration("commonSecurityConfig")
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @RequiredArgsConstructor
+@ConditionalOnBean(JwtAuthenticationFilter.class)
 @ConditionalOnMissingBean(name = "securityFilterChain")
 public class SecurityConfig {
 

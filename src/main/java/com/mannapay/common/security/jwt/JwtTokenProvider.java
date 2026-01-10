@@ -5,6 +5,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -19,9 +20,11 @@ import java.util.stream.Collectors;
 /**
  * JWT token provider for generating and validating JWT tokens.
  * Uses JJWT library for token operations.
+ * Only activated when jwt.secret property is present (not for Keycloak-based auth).
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "jwt.secret")
 public class JwtTokenProvider {
 
     private final SecretKey secretKey;
