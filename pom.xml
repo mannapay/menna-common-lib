@@ -7,7 +7,7 @@
 
     <groupId>com.mannapay</groupId>
     <artifactId>menna-common-lib</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.6</version>
     <packaging>jar</packaging>
 
     <name>Menna Common Library</name>
@@ -228,23 +228,14 @@
     <!-- JFrog Artifactory Distribution -->
     <distributionManagement>
         <repository>
-            <id>jfrog-releases</id>
+            <id>central</id>
             <name>JFrog Releases</name>
-            <url>${env.JFROG_URL}/artifactory/libs-release-local</url>
+            <url>https://trialqrau96.jfrog.io/artifactory/paret-pom-libs-release</url>
         </repository>
         <snapshotRepository>
-            <id>jfrog-snapshots</id>
+            <id>snapshots</id>
             <name>JFrog Snapshots</name>
-            <url>${env.JFROG_URL}/artifactory/libs-snapshot-local</url>
+            <url>https://trialqrau96.jfrog.io/artifactory/paret-pom-libs-snapshot</url>
         </snapshotRepository>
     </distributionManagement>
-
-    <!-- JFrog Artifactory for downloading dependencies (if needed) -->
-    <repositories>
-        <repository>
-            <id>jfrog-releases</id>
-            <name>JFrog Releases</name>
-            <url>${env.JFROG_URL}/artifactory/libs-release</url>
-        </repository>
-    </repositories>
 </project>

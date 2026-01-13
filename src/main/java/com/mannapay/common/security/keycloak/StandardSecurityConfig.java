@@ -2,6 +2,8 @@ package com.mannapay.common.security.keycloak;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -31,6 +33,7 @@ import java.util.List;
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "security.mode", havingValue = "keycloak", matchIfMissing = false)
 public class StandardSecurityConfig {
 
     private final JwtAuthConverter jwtAuthConverter;
@@ -75,9 +78,11 @@ public class StandardSecurityConfig {
     /**
      * Main security filter chain for protected endpoints.
      * Validates JWT tokens from Keycloak.
+     * Uses @ConditionalOnMissingBean so services can define their own security config
      */
     @Bean
     @Order(2)
+    @ConditionalOnMissingBean(SecurityFilterChain.class)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)

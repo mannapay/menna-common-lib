@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -22,10 +23,15 @@ import java.io.IOException;
 /**
  * JWT authentication filter that validates JWT tokens on each request.
  * Extracts user details and sets authentication in SecurityContext.
+ *
+ * This filter is only activated when both JwtTokenProvider and UserDetailsService
+ * beans are available. Services using OAuth2/Keycloak authentication should not
+ * provide UserDetailsService and will use a different authentication flow.
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnBean({JwtTokenProvider.class, UserDetailsService.class})
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
