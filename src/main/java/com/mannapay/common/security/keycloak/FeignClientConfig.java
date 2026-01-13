@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
@@ -14,10 +15,11 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 /**
  * Configuration for Feign clients to add OAuth2 authentication headers.
  * Enables secure service-to-service communication using Keycloak tokens.
+ * Services can override by defining their own RequestInterceptor beans.
  *
  * Based on salon-project implementation pattern.
  */
-@Configuration
+@Configuration("commonFeignClientConfig")
 @RequiredArgsConstructor
 public class FeignClientConfig {
 
@@ -32,7 +34,8 @@ public class FeignClientConfig {
      * Request interceptor that adds OAuth2 token and service identification headers
      * to all outgoing Feign client requests.
      */
-    @Bean
+    @Bean("commonServiceAuthRequestInterceptor")
+    @ConditionalOnMissingBean(name = "serviceAuthRequestInterceptor")
     public RequestInterceptor serviceAuthRequestInterceptor() {
         return template -> {
             // Add service identification header
@@ -64,7 +67,8 @@ public class FeignClientConfig {
      * Request interceptor that only adds service identification without OAuth2 token.
      * Use this for internal service calls that don't require authentication.
      */
-    @Bean
+    @Bean("commonInternalServiceInterceptor")
+    @ConditionalOnMissingBean(name = "internalServiceInterceptor")
     public RequestInterceptor internalServiceInterceptor() {
         return template -> {
             template.header("X-Service-Name", serviceName);
